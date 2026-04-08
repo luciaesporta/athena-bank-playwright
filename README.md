@@ -95,8 +95,8 @@ Before running the tests, ensure you have:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/luciaesporta/qa-automation-playwright.git
-cd qa-automation-playwright
+git clone https://github.com/luciaesporta/athena-bank-playwright.git
+cd athena-bank-playwright
 ```
 
 ### 2. Install Dependencies
@@ -111,7 +111,31 @@ npm install
 npx playwright install
 ```
 
-### 4. Set Up the Application
+### 4. Configure Environment Variables
+
+Copy the example file and fill in your credentials:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with the credentials for your test accounts:
+
+```
+BASE_URL=http://localhost:3000
+API_URL=http://localhost:6007/api
+
+TEST_VALID_EMAIL=your-test-user@example.com
+TEST_VALID_PASSWORD=yourpassword
+
+TEST_SENDER_EMAIL=your-sender@example.com
+TEST_SENDER_PASSWORD=yourpassword
+
+TEST_RECEIVER_EMAIL=your-receiver@example.com
+TEST_RECEIVER_PASSWORD=yourpassword
+```
+
+### 5. Set Up the Application
 
 The tests require the Athena Bank Fintech application to be running. Clone and set up the application:
 
@@ -163,59 +187,37 @@ The project uses an optimized configuration that separates tests by type for bet
 ### Run All Tests
 
 ```bash
-npx playwright test
+npm test
 ```
 
 ### Run Tests by Type
 
 ```bash
-# Authentication tests (fast, no setup)
+# API tests only
+npm run test:api
+
+# Authentication tests
 npx playwright test --project=auth-tests
 
-# Signup tests (fast, no setup)
+# Signup tests
 npx playwright test --project=signup-tests
 
 # Transaction tests (with setup)
 npx playwright test --project=transaction-tests
-
-# Multiple project types
-npx playwright test --project=auth-tests --project=signup-tests --project=transaction-tests
-```
-
-### Run Specific Test Files
-
-```bash
-# Authentication tests
-npx playwright test tests/auth.spec.ts
-
-# Signup tests
-npx playwright test tests/signup.spec.ts
-
-# Transaction tests
-npx playwright test tests/transactions.spec.ts
 ```
 
 ### Run Tests in Different Modes
 
 ```bash
-# Run tests in headed mode (see browser)
-npx playwright test --headed
-
-# Run tests in debug mode
-npx playwright test --debug
-
-# Run tests with specific browser
-npx playwright test --project=chromium
+npm run test:headed   # see the browser
+npm run test:debug    # step-by-step debugger
+npm run test:ui       # Playwright UI mode
 ```
 
-### Generate Test Reports
+### View Reports
 
 ```bash
-# Generate HTML report
-npx playwright test --reporter=html
-
-# View the report
-npx playwright show-report
+npm run test:report
 ```
 
 ## 🔄 CI/CD Pipeline
@@ -240,7 +242,7 @@ The project includes a comprehensive GitHub Actions workflow (`.github/workflows
 
 After a successful workflow run, test reports are available at:
 ```
-https://luciaesporta.github.io/qa-automation-playwright/report-{BUILD_NUMBER}/
+https://luciaesporta.github.io/athena-bank-playwright/report-{BUILD_NUMBER}/
 ```
 
 ## 📊 Test Reports
@@ -260,32 +262,9 @@ The project generates comprehensive test reports including:
 
 ## 📝 Test Data Management
 
-Test data is managed through JSON files for maintainability:
+Test credentials are loaded from environment variables — never hardcoded. Copy `.env.example` to `.env` and fill in your values (see Setup Instructions above).
 
-### `data/testData.json`
-
-```json
-{
-  "validUser": {
-    "firstName": "Lucía",
-    "lastName": "Esporta",
-    "email": "luciaalvarezesporta@gmail.com",
-    "password": "12345678"
-  },
-  "senderMoney": {
-    "firstName": "Money",
-    "lastName": "Sender",
-    "email": "luciaalvarezesporta+moneysender@gmail.com",
-    "password": "12345678"
-  },
-  "receiverMoney": {
-    "firstName": "Money",
-    "lastName": "Receiver",
-    "email": "luciaalvarezesporta+moneyreceiver@gmail.com",
-    "password": "12345678"
-  }
-}
-```
+Non-sensitive test data (account types, amounts, routes) lives in `data/testData.json` and `constants/testConstants.ts`.
 
 ## 🏗️ Page Object Model
 
@@ -377,10 +356,18 @@ export default defineConfig({
 
 ### Environment Variables
 
-- **`BASE_URL`**: Application base URL (default: http://localhost:3000)
-- **`MONGO_URI`**: MongoDB connection string
-- **`JWT_SECRET`**: JWT token secret for authentication
-- **`PORT`**: Backend server port (default: 6007)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `BASE_URL` | Frontend URL | `http://localhost:3000` |
+| `API_URL` | Backend API URL | `http://localhost:6007/api` |
+| `TEST_VALID_EMAIL` | Main test account email | — |
+| `TEST_VALID_PASSWORD` | Main test account password | — |
+| `TEST_SENDER_EMAIL` | Sender test account email | — |
+| `TEST_SENDER_PASSWORD` | Sender test account password | — |
+| `TEST_RECEIVER_EMAIL` | Receiver test account email | — |
+| `TEST_RECEIVER_PASSWORD` | Receiver test account password | — |
+| `MONGO_URI` | MongoDB connection string (CI only) | — |
+| `JWT_SECRET` | JWT secret (CI only) | — |
 
 ### Debug Mode
 
