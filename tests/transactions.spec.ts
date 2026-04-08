@@ -45,8 +45,7 @@ testNewUserWithBankAccount('TC1 - Verify user can create a bank account correctl
 testSendsMoneyUser('TC2 - Verify user can send money to another user', async ({page}) => {
   await expect (pageDashboard.dashboardTitle).toBeVisible({ timeout: 5000 });
   await pageDashboard.buttonSendMoney.click(); 
-  await modalTransferMoney.completeAndSendMoneyTransfer(receiver.email, '25')
-  await page.waitForTimeout(5000);
+  await modalTransferMoney.completeAndSendMoneyTransfer(receiver.email, '25');
 });
 
 testReceivesMoneyUser('TC3 - Verify user receives money from another user', async ({page}) => {

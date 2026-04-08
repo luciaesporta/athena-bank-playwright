@@ -46,9 +46,9 @@ export class PageSignUp{
 
     async signUpUser(name: string, lastName: string, email: string, password: string){
         await this.completeSignUpForm(name, lastName, email, password);
+        const responsePromise = this.page.waitForResponse(`**${ApiRoutes.signup}`);
         await this.clickSignUpButton();
-        
-        await this.page.waitForTimeout(1000);
+        await responsePromise;
     }
 
     static generateUniqueEmail(baseEmail: string): string {

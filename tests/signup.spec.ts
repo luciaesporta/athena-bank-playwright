@@ -33,7 +33,6 @@ test('TC3 - User is redirected to login flow once the account is created', async
   await pageSignUp.signUpUser(validUser.firstName, validUser.lastName, randomEmail, validUser.password);
   await expect(page.getByText(pageSignUp.messageCreationAccount)).toBeVisible({ timeout: 10000 });
   await page.waitForURL(Routes.login);
-  await page.waitForTimeout(2000);
   Logger.info('Signup redirection test completed successfully');
 });
 

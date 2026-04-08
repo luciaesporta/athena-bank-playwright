@@ -43,6 +43,7 @@ async completeInitialAmount (amount: string) {
 }
 
 async createAccount(typeOfAccount: string, inicialAmount: string) {
+    await this.typeOfAccountCombobox.waitFor({ state: 'visible' });
     await this.selectAccountType(typeOfAccount);
     await this.completeInitialAmount(inicialAmount);
     await this.buttonCreateAccount.click();

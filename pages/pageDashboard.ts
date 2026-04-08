@@ -51,7 +51,6 @@ export class PageDashboard {
       }
 
       await this.buttonAddAccount.waitFor({ state: 'visible' });
-      await this.page.waitForTimeout(1000);
       await this.buttonAddAccount.click();
 
       const modalCreateBankAccount = new ModalCreateBankAccount(this.page);
