@@ -1,8 +1,9 @@
 import { test, expect, request, APIRequestContext } from '@playwright/test';
-import TestData from '../data/testData.json';
 import { ENV } from '../config/environment';
 import { AccountsClient } from '../helpers/accountsClient';
 import type { LoginSuccessBody, TestUser } from '../types';
+
+const { validUser, sender } = ENV.testCredentials;
 
 
 interface AccountResponse {
@@ -75,11 +76,11 @@ test.describe('Bank Accounts API', () => {
     });
     accountsClient = new AccountsClient(apiContext);
 
-    const validUserData = await ensureUserCanLogin(TestData.validUser as TestUser);
+    const validUserData = await ensureUserCanLogin(validUser as TestUser);
     validUserToken = validUserData.token;
     validUserId = validUserData.userId;
 
-    const secondUserData = await ensureUserCanLogin(TestData.senderMoney as TestUser);
+    const secondUserData = await ensureUserCanLogin(sender as TestUser);
     secondUserToken = secondUserData.token;
   });
 

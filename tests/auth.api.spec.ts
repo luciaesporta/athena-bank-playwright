@@ -1,7 +1,8 @@
 import { test, expect, request, APIRequestContext } from '@playwright/test';
-import TestData from '../data/testData.json';
 import { ENV, API_ENDPOINTS } from '../config/environment';
 import type { LoginSuccessBody, TestUser } from '../types';
+
+const { validUser, sender, receiver } = ENV.testCredentials;
 
 const expiredJwtToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0ZjFhMmIzYzRkNWU2ZjdhOGI5YzBkMSIsImVtYWlsIjoiZXhwaXJlZEB0ZXN0LmNvbSIsImlhdCI6MTY5MDAwMDAwMCwiZXhwIjoxNjkwMDAwMDAxfQ.invalidsignature';
@@ -77,8 +78,8 @@ test.describe('Auth API - Security', () => {
   test('TC-API-AUTH-01: Successful login should return token and user schema', async () => {
     const response = await apiContext.post(`/api${API_ENDPOINTS.AUTH.LOGIN}`, {
       data: {
-        email: TestData.validUser.email,
-        password: TestData.validUser.password,
+        email: validUser.email,
+        password: validUser.password,
       },
     });
 
@@ -93,13 +94,13 @@ test.describe('Auth API - Security', () => {
       lastName: expect.any(String),
       email: expect.any(String),
     });
-    expect(body.user.email).toBe(TestData.validUser.email);
+    expect(body.user.email).toBe(validUser.email);
   });
 
   test('TC-API-AUTH-02: Login with wrong password should return invalid credentials', async () => {
     const response = await apiContext.post(`/api${API_ENDPOINTS.AUTH.LOGIN}`, {
       data: {
-        email: TestData.validUser.email,
+        email: validUser.email,
         password: 'wrongpassword',
       },
     });
@@ -113,7 +114,7 @@ test.describe('Auth API - Security', () => {
     const response = await apiContext.post(`/api${API_ENDPOINTS.AUTH.LOGIN}`, {
       data: {
         email: 'user-does-not-exist@test.com',
-        password: TestData.validUser.password,
+        password: validUser.password,
       },
     });
 
@@ -185,8 +186,8 @@ test.describe('Auth API - Security', () => {
   });
 
   test('TC-API-AUTH-09: Valid token from user A should not expose user B accounts', async () => {
-    const authUserA = await ensureUserCanLogin(TestData.senderMoney as TestUser);
-    const authUserB = await ensureUserCanLogin(TestData.receiverMoney as TestUser);
+    const authUserA = await ensureUserCanLogin(sender as TestUser);
+    const authUserB = await ensureUserCanLogin(receiver as TestUser);
 
     const customContext = await request.newContext({
       baseURL: backendBaseUrl,
@@ -212,7 +213,7 @@ test.describe('Auth API - Security', () => {
   });
 
   test('TC-API-AUTH-10: Access protected route with valid token should work', async () => {
-    const authData = await loginAndGetAuthData(TestData.validUser.email, TestData.validUser.password);
+    const authData = await loginAndGetAuthData(validUser.email, validUser.password);
     const customContext = await request.newContext({
       baseURL: backendBaseUrl,
       extraHTTPHeaders: {

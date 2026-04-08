@@ -2,8 +2,10 @@ import { test, expect } from '@playwright/test';
 import { PageAuth } from '../pages/pageAuth';
 import { PageDashboard } from '../pages/pageDashboard';
 import { ModalFunding } from '../pages/modalFunding';
-import TestData from '../data/testData.json';
 import { Logger } from '../utils/Logger';
+import { ENV } from '../config/environment';
+
+const { validUser } = ENV.testCredentials;
 
 let pageAuth: PageAuth;
 let pageDashboard: PageDashboard;
@@ -18,7 +20,7 @@ test.beforeEach(async ({ page }) => {
 
 test('TC1 - Add funds successfully', async () => {
     Logger.step('Add funds successfully', { action: 'addFundsSuccessfully' });
-    await pageAuth.loginSuccessfully(TestData.validUser.email, TestData.validUser.password);
+    await pageAuth.loginSuccessfully(validUser.email, validUser.password);
     await pageDashboard.visitDashboardPage();
     await modalFunding.addFunds('100');
     Logger.info('Add funds test completed successfully');
@@ -26,7 +28,7 @@ test('TC1 - Add funds successfully', async () => {
 
 test('TC2 - Cancel add funds', async () => {
     Logger.step('Cancel add funds', { action: 'cancelAddFunds' });
-    await pageAuth.loginSuccessfully(TestData.validUser.email, TestData.validUser.password);
+    await pageAuth.loginSuccessfully(validUser.email, validUser.password);
     await pageDashboard.visitDashboardPage();
     await modalFunding.cancelAddFunds();
     await expect(pageDashboard.dashboardTitle).toBeVisible({ timeout: 7000 });

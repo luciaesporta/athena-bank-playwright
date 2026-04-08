@@ -5,9 +5,10 @@ import { ModalCreateBankAccount } from '../pages/modalCreateBankAccount';
 import { BackendUtils } from '../utils/backendUtils';
 import { Logger } from '../utils/Logger';
 import { ENV } from '../config/environment';
-import TestData from '../data/testData.json';
 import fs from 'fs/promises';
 import path from 'path';
+
+const { validUser, receiver } = ENV.testCredentials;
 
 const senderMoneyUserAuthFile = 'playwright/.senderMoneyUser.json'
 const receiverMoneyUserAuthFile = 'playwright/.receiverMoneyUser.json'
@@ -15,7 +16,7 @@ const userSentDataFile = 'playwright/.senderMoneyUser.data.json'
 const newUserWithBankAccountAuthFile = 'playwright/.newUserWithBankAccount.json'
 
 setup ('Creates user via API and sends money', async ({page, request}) => {
-    const newUser = await BackendUtils.createUserViaAPI(request, TestData.validUser);
+    const newUser = await BackendUtils.createUserViaAPI(request, validUser);
 
     await fs.writeFile(path.resolve(__dirname, '..', userSentDataFile), JSON.stringify(newUser, null, 2))
 
@@ -33,12 +34,12 @@ setup ('Creates user via API and sends money', async ({page, request}) => {
   setup ('Money receiver logs in successfully', async ({page}) => {
     const pageAuth = new PageAuth(page);
     await pageAuth.visitLoginPage();
-    await pageAuth.loginSuccessfully(TestData.receiverMoney.email, TestData.receiverMoney.password);
+    await pageAuth.loginSuccessfully(receiver.email, receiver.password);
     await page.context().storageState({path: receiverMoneyUserAuthFile});
   });
 
   setup ('Creates new user with bank account for testing', async ({page, request}) => {
-    const newUser = await BackendUtils.createUserViaAPI(request, TestData.validUser);
+    const newUser = await BackendUtils.createUserViaAPI(request, validUser);
     
     const pageAuth = new PageAuth(page);
     const pageDashboard = new PageDashboard(page);

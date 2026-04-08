@@ -1,4 +1,15 @@
-import { TimeoutConfig, RetryConfig, TestDataConfig } from '../types';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+
+import { TimeoutConfig, RetryConfig, TestDataConfig, TestUser } from '../types';
+import { ConfigValidationResult } from '../types/config';
+
+interface TestCredentials {
+  validUser: TestUser;
+  sender: TestUser;
+  receiver: TestUser;
+}
 
 export interface EnvironmentConfig {
   baseUrl: string;
@@ -6,8 +17,51 @@ export interface EnvironmentConfig {
   timeouts: TimeoutConfig;
   retries: RetryConfig;
   testData: TestDataConfig;
+  testCredentials: TestCredentials;
 }
 
+function validateConfig(): ConfigValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  const required = [
+    'TEST_VALID_EMAIL',
+    'TEST_VALID_PASSWORD',
+    'TEST_SENDER_EMAIL',
+    'TEST_SENDER_PASSWORD',
+    'TEST_RECEIVER_EMAIL',
+    'TEST_RECEIVER_PASSWORD',
+  ];
+
+  for (const varName of required) {
+    if (!process.env[varName]) {
+      errors.push(`Missing required environment variable: ${varName}`);
+    }
+  }
+
+  if (!process.env.BASE_URL) warnings.push('BASE_URL not set, defaulting to http://localhost:3000');
+  if (!process.env.API_URL) warnings.push('API_URL not set, defaulting to http://localhost:6007/api');
+
+  const result: ConfigValidationResult = {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+    validatedAt: new Date().toISOString(),
+  };
+
+  if (warnings.length > 0) {
+    warnings.forEach((w) => console.warn(`[Config] WARNING: ${w}`));
+  }
+
+  if (!result.isValid) {
+    errors.forEach((e) => console.error(`[Config] ERROR: ${e}`));
+    console.error('[Config] Create a .env file with the missing variables. See .env.example for reference.');
+  }
+
+  return result;
+}
+
+validateConfig();
 
 export const ENV: EnvironmentConfig = {
   baseUrl: process.env.BASE_URL || 'http://localhost:3000',
@@ -35,6 +89,27 @@ export const ENV: EnvironmentConfig = {
       min: parseInt(process.env.MIN_TRANSFER_AMOUNT || '1'),
       max: parseInt(process.env.MAX_TRANSFER_AMOUNT || '100'),
       default: parseInt(process.env.DEFAULT_TRANSFER_AMOUNT || '25'),
+    },
+  },
+
+  testCredentials: {
+    validUser: {
+      firstName: 'Test',
+      lastName: 'User',
+      email: process.env.TEST_VALID_EMAIL || '',
+      password: process.env.TEST_VALID_PASSWORD || '',
+    },
+    sender: {
+      firstName: 'Money',
+      lastName: 'Sender',
+      email: process.env.TEST_SENDER_EMAIL || '',
+      password: process.env.TEST_SENDER_PASSWORD || '',
+    },
+    receiver: {
+      firstName: 'Money',
+      lastName: 'Receiver',
+      email: process.env.TEST_RECEIVER_EMAIL || '',
+      password: process.env.TEST_RECEIVER_PASSWORD || '',
     },
   },
 };

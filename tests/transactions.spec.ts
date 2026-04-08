@@ -2,11 +2,13 @@ import { test, expect } from '@playwright/test';
 import { PageAuth } from '../pages/pageAuth';
 import { PageDashboard } from '../pages/pageDashboard';
 import { ModalCreateBankAccount } from '../pages/modalCreateBankAccount';
-import TestData from '../data/testData.json';
+import { ENV } from '../config/environment';
 import { ApiUtils } from '../utils/apiUtils';
 import { getUserEmailFromFile, getJwtFromStorage } from '../utils/authUtils';
 import { ModalTransferMoney } from '../pages/modalTransferMoney';
 import fs from 'fs/promises';
+
+const { receiver } = ENV.testCredentials;
 
 let pageAuth: PageAuth;
 let pageDashboard: PageDashboard;
@@ -43,7 +45,7 @@ testNewUserWithBankAccount('TC1 - Verify user can create a bank account correctl
 testSendsMoneyUser('TC2 - Verify user can send money to another user', async ({page}) => {
   await expect (pageDashboard.dashboardTitle).toBeVisible({ timeout: 5000 });
   await pageDashboard.buttonSendMoney.click(); 
-  await modalTransferMoney.completeAndSendMoneyTransfer('luciaalvarezesporta+moneyreceiver@gmail.com', '25')
+  await modalTransferMoney.completeAndSendMoneyTransfer(receiver.email, '25')
   await page.waitForTimeout(5000);
 });
 
@@ -56,7 +58,7 @@ testReceivesMoneyUser('TC3 - Verify user receives money from another user', asyn
     const emailSentUser = await getUserEmailFromFile('playwright/.senderMoneyUser.data.json');
     const jwt = await getJwtFromStorage('playwright/.senderMoneyUser.json');
     const randomAmount = PageDashboard.generateRandomAmount();
-    await pageDashboard.transferMoneyViaAPI(request, jwt, TestData.receiverMoney.email, randomAmount);
+    await pageDashboard.transferMoneyViaAPI(request, jwt, receiver.email, randomAmount);
     await pageDashboard.verifyTransferOnDashboard(emailSentUser, randomAmount);
   });
   

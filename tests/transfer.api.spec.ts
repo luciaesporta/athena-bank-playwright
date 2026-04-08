@@ -1,7 +1,8 @@
 import { test, expect, request, APIRequestContext } from '@playwright/test';
-import TestData from '../data/testData.json';
 import { ENV, API_ENDPOINTS } from '../config/environment';
 import type { LoginSuccessBody, TestUser } from '../types';
+
+const { validUser, sender, receiver } = ENV.testCredentials;
 
 const API_DEBIT_ACCOUNT_TYPE = 'debit';
 
@@ -123,8 +124,8 @@ test.describe('Transfer API — Business Logic', () => {
   test.beforeAll(async () => {
     apiContext = await request.newContext({ baseURL: backendBaseUrl });
 
-    const senderAuth = await ensureUserCanLogin(TestData.senderMoney as TestUser);
-    const receiverAuth = await ensureUserCanLogin(TestData.receiverMoney as TestUser);
+    const senderAuth = await ensureUserCanLogin(sender as TestUser);
+    const receiverAuth = await ensureUserCanLogin(receiver as TestUser);
     senderToken = senderAuth.token;
     receiverToken = receiverAuth.token;
 
@@ -157,7 +158,7 @@ test.describe('Transfer API — Business Logic', () => {
     await test.step('Send transfer', async () => {
       const response = await postTransfer(senderToken, {
         fromAccountId: senderAccountId,
-        toEmail: TestData.receiverMoney.email,
+        toEmail: receiver.email,
         amount: VALID_TRANSFER_AMOUNT,
       });
       expect(response.status()).toBe(200);
@@ -181,7 +182,7 @@ test.describe('Transfer API — Business Logic', () => {
     const lowAccount = await createAccount(senderToken, 10, { trackForCleanup: false });
     const response = await postTransfer(senderToken, {
       fromAccountId: lowAccount._id,
-      toEmail: TestData.receiverMoney.email,
+      toEmail: receiver.email,
       amount: 9999,
     });
     expect(response.status()).toBe(400);
@@ -205,7 +206,7 @@ test.describe('Transfer API — Business Logic', () => {
         firstName: 'No',
         lastName: 'Account',
         email: `no-account-user-${Date.now()}@test.com`,
-        password: TestData.validUser.password,
+        password: validUser.password,
       },
     });
     expect(signupResponse.status()).toBe(201);
@@ -224,7 +225,7 @@ test.describe('Transfer API — Business Logic', () => {
   test('[TC-API-TRANSFER-05] Zero amount rejected', async () => {
     const response = await postTransfer(senderToken, {
       fromAccountId: senderAccountId,
-      toEmail: TestData.receiverMoney.email,
+      toEmail: receiver.email,
       amount: 0,
     });
     expect(response.status()).toBe(400);
@@ -234,7 +235,7 @@ test.describe('Transfer API — Business Logic', () => {
   test('[TC-API-TRANSFER-06] Negative amount rejected', async () => {
     const response = await postTransfer(senderToken, {
       fromAccountId: senderAccountId,
-      toEmail: TestData.receiverMoney.email,
+      toEmail: receiver.email,
       amount: -50,
     });
     expect(response.status()).toBe(400);
@@ -246,7 +247,7 @@ test.describe('Transfer API — Business Logic', () => {
       headers: { ...authHeader(senderToken), 'Content-Type': 'application/json' },
       data: {
         fromAccountId: senderAccountId,
-        toEmail: TestData.receiverMoney.email,
+        toEmail: receiver.email,
       },
     });
     expect(response.status()).toBe(400);
@@ -256,7 +257,7 @@ test.describe('Transfer API — Business Logic', () => {
   test('[TC-API-TRANSFER-08] Non-existent sender account id', async () => {
     const response = await postTransfer(senderToken, {
       fromAccountId: NONEXISTENT_OBJECT_ID,
-      toEmail: TestData.receiverMoney.email,
+      toEmail: receiver.email,
       amount: 10,
     });
     expect(response.status()).toBe(404);
@@ -270,7 +271,7 @@ test.describe('Transfer API — Business Logic', () => {
 
     const response = await postTransfer(senderToken, {
       fromAccountId: receiverAccountId,
-      toEmail: TestData.receiverMoney.email,
+      toEmail: receiver.email,
       amount: 10,
     });
     expect(response.status()).toBe(404);
@@ -285,7 +286,7 @@ test.describe('Transfer API — Business Logic', () => {
     await test.step('Transfer should fail', async () => {
       const response = await postTransfer(senderToken, {
         fromAccountId: senderAccountId,
-        toEmail: TestData.receiverMoney.email,
+        toEmail: receiver.email,
         amount: 1,
       });
       expect(response.status()).toBe(400);
@@ -308,7 +309,7 @@ test.describe('Transfer API — Business Logic', () => {
     try {
       const response = await postTransfer(senderToken, {
         fromAccountId: senderAccountId,
-        toEmail: TestData.receiverMoney.email,
+        toEmail: receiver.email,
         amount: 1,
       });
       expect(response.status()).toBe(400);
@@ -323,7 +324,7 @@ test.describe('Transfer API — Business Logic', () => {
   test('[TC-API-TRANSFER-12] Self-transfer is accepted (documented backend gap)', async () => {
     const response = await postTransfer(senderToken, {
       fromAccountId: senderAccountId,
-      toEmail: TestData.senderMoney.email,
+      toEmail: sender.email,
       amount: 1,
     });
     expect(response.status()).toBe(200);
