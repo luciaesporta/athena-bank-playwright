@@ -12,7 +12,7 @@ export default defineConfig({
     navigationTimeout: ConfigHelpers.getTimeout('pageLoad'),
   },
 
-  testMatch: /.*\.(spec|test)\.(ts|js|mjs)/,
+  testMatch: /.*\.(spec|setup)\.(ts|js|mjs)/,
 
   projects: [
     {
@@ -58,21 +58,21 @@ export default defineConfig({
     {
       name: 'funding-tests',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /.*funding\.test\.ts$/,
+      testMatch: /.*funding\.spec\.ts$/,
       dependencies: [], 
     },
 
     {
       name: 'freeze-account-tests',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /.*freezeAccount\.test\.ts$/,
+      testMatch: /.*freezeAccount\.spec\.ts$/,
       dependencies: [], 
     },
 
     {
       name: 'bank-accounts-tests',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /.*bankAccounts\.test\.ts$/,
+      testMatch: /.*bankAccounts\.spec\.ts$/,
       dependencies: [], 
     },
   ],
