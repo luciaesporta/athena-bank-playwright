@@ -46,7 +46,7 @@ export class PageDashboard {
       const isButtonVisible = await this.buttonAddAccount.isVisible();
       
       if (!isButtonVisible) {
-        console.log('Add account button is not visible - user may already have accounts');
+        Logger.warn('Add account button is not visible - user may already have accounts');
         return false;
       }
 
@@ -58,7 +58,7 @@ export class PageDashboard {
       
       return true;
     } catch (error) {
-      console.log('Error creating bank account:', error);
+      Logger.error('Error creating bank account', error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }

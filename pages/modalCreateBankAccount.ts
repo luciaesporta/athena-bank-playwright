@@ -1,4 +1,5 @@
 import {Page, Locator, expect} from '@playwright/test';
+import { Logger } from '../utils/Logger';
 
 export class ModalCreateBankAccount {
     readonly page: Page;
@@ -34,7 +35,7 @@ async selectAccountType(typeOfAccount: string){
     try {
         await this.page.getByRole('option', { name: typeOfAccount}).click();
     } catch (error) {
-        console.log('The option does not exist')
+        Logger.warn('Account type option not found', { accountType: typeOfAccount });
     }
 }
 

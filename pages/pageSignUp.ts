@@ -71,7 +71,7 @@ export class PageSignUp{
             },
         });
 
-        console.log(`API Response Status: ${response.status()} for email: ${uniqueEmail}`);
+        Logger.info(`API signup response`, { status: response.status(), email: uniqueEmail });
         
         return { response, uniqueEmail };
     }
@@ -79,8 +79,7 @@ export class PageSignUp{
     async validateSignupAPIResponse(response: any, userData: {firstName: string, lastName: string}, email: string) {
         if (response.status() !== 201) {
             const errorBody = await response.text();
-            console.log(`Expected status 201, but got ${response.status()}. Response body: ${errorBody}`);
-            console.log(`Email used: ${email}`);
+            Logger.error(`Unexpected signup status`, new Error(`Expected 201, got ${response.status()}`), { email, responseBody: errorBody });
         }
         
         expect(response.status()).toBe(201);
