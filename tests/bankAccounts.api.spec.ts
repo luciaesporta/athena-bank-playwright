@@ -1,7 +1,8 @@
-import { test, expect, request, APIRequestContext } from '@playwright/test';
+import { test, expect, APIRequestContext } from '@playwright/test';
 import { ENV } from '../config/environment';
-import { AccountsClient } from '../helpers/accountsClient';
-import type { LoginSuccessBody, TestUser } from '../types';
+import { AccountsClient } from '../utils/accountsClient';
+import type { TestUser } from '../types';
+import { getBackendBaseUrl, ensureUserCanLogin } from '../utils/apiTestHelpers';
 
 const { validUser, sender } = ENV.testCredentials;
 
@@ -19,13 +20,6 @@ interface AccountResponse {
   __v?: number;
 }
 
-
-const backendBaseUrl = (() => {
-  const configuredApiUrl = process.env.API_URL || ENV.apiUrl;
-  const cleanedUrl = configuredApiUrl.endsWith('/') ? configuredApiUrl.slice(0, -1) : configuredApiUrl;
-  return cleanedUrl.endsWith('/api') ? cleanedUrl.slice(0, -4) : cleanedUrl;
-})();
-
 test.describe('Bank Accounts API', () => {
   let apiContext: APIRequestContext;
   let accountsClient: AccountsClient;
@@ -35,52 +29,17 @@ test.describe('Bank Accounts API', () => {
   const createdAccountIds: string[] = [];
 
 
-  async function loginUser(email: string, password: string): Promise<LoginSuccessBody> {
-    const response = await apiContext.post('/api/auth/login', {
-      data: { email, password },
-    });
-
-    expect(response.status()).toBe(200);
-    const body = (await response.json()) as LoginSuccessBody;
-    return body;
-  }
-
-  async function ensureUserCanLogin(user: TestUser): Promise<{ token: string; userId: string }> {
-    try {
-      const loginData = await loginUser(user.email, user.password);
-      return { token: loginData.token, userId: loginData.user.id };
-    } catch {
-
-      const signupResponse = await apiContext.post('/api/auth/signup', {
-        data: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          password: user.password,
-        },
-      });
-
-      if ([200, 201, 409].includes(signupResponse.status())) {
-        const loginData = await loginUser(user.email, user.password);
-        return { token: loginData.token, userId: loginData.user.id };
-      }
-
-      throw new Error(`Failed to ensure user can login: ${user.email}`);
-    }
-  }
-
-
   test.beforeAll(async ({ playwright }) => {
     apiContext = await playwright.request.newContext({
-      baseURL: backendBaseUrl,
+      baseURL: getBackendBaseUrl(),
     });
     accountsClient = new AccountsClient(apiContext);
 
-    const validUserData = await ensureUserCanLogin(validUser as TestUser);
+    const validUserData = await ensureUserCanLogin(apiContext, validUser as TestUser);
     validUserToken = validUserData.token;
-    validUserId = validUserData.userId;
+    validUserId = validUserData.user.id;
 
-    const secondUserData = await ensureUserCanLogin(sender as TestUser);
+    const secondUserData = await ensureUserCanLogin(apiContext, sender as TestUser);
     secondUserToken = secondUserData.token;
   });
 

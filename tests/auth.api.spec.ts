@@ -1,59 +1,23 @@
 import { test, expect, request, APIRequestContext } from '@playwright/test';
 import { ENV, API_ENDPOINTS } from '../config/environment';
 import type { LoginSuccessBody, TestUser } from '../types';
+import { getBackendBaseUrl, loginUser, ensureUserCanLogin } from '../utils/apiTestHelpers';
 
 const { validUser, sender, receiver } = ENV.testCredentials;
 
 const expiredJwtToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0ZjFhMmIzYzRkNWU2ZjdhOGI5YzBkMSIsImVtYWlsIjoiZXhwaXJlZEB0ZXN0LmNvbSIsImlhdCI6MTY5MDAwMDAwMCwiZXhwIjoxNjkwMDAwMDAxfQ.invalidsignature';
 
-const backendBaseUrl = (() => {
-  const configuredApiUrl = process.env.API_URL || ENV.apiUrl;
-  const cleanedUrl = configuredApiUrl.endsWith('/') ? configuredApiUrl.slice(0, -1) : configuredApiUrl;
-  return cleanedUrl.endsWith('/api') ? cleanedUrl.slice(0, -4) : cleanedUrl;
-})();
-
 test.describe('Auth API - Security', () => {
   let apiContext: APIRequestContext;
 
   test.beforeEach(async () => {
-    apiContext = await request.newContext({ baseURL: backendBaseUrl });
+    apiContext = await request.newContext({ baseURL: getBackendBaseUrl() });
   });
 
   test.afterEach(async () => {
     await apiContext.dispose();
   });
-
-  async function loginAndGetAuthData(email: string, password: string): Promise<LoginSuccessBody> {
-    const response = await apiContext.post(`/api${API_ENDPOINTS.AUTH.LOGIN}`, { data: { email, password } });
-    expect(response.status()).toBe(200);
-
-    const body = (await response.json()) as LoginSuccessBody;
-    return body;
-  }
-
-  async function ensureUserCanLogin(user: TestUser): Promise<LoginSuccessBody> {
-    const loginResponse = await apiContext.post(`/api${API_ENDPOINTS.AUTH.LOGIN}`, {
-      data: { email: user.email, password: user.password },
-    });
-
-    if (loginResponse.status() === 200) {
-      const body = (await loginResponse.json()) as LoginSuccessBody;
-      return body;
-    }
-
-    const signupResponse = await apiContext.post(`/api${API_ENDPOINTS.AUTH.SIGNUP}`, {
-      data: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        password: user.password,
-      },
-    });
-
-    expect([200, 201, 400, 409]).toContain(signupResponse.status());
-    return loginAndGetAuthData(user.email, user.password);
-  }
 
   function getAccountOwnerId(account: Record<string, any>): string | undefined {
     if (typeof account.userId === 'string') return account.userId;
@@ -157,7 +121,7 @@ test.describe('Auth API - Security', () => {
 
   test('TC-API-AUTH-07: Access protected route with malformed token should return invalid token', async () => {
     const customContext = await request.newContext({
-      baseURL: backendBaseUrl,
+      baseURL: getBackendBaseUrl(),
       extraHTTPHeaders: {
         Authorization: 'Bearer this_is_not_a_jwt',
       },
@@ -172,7 +136,7 @@ test.describe('Auth API - Security', () => {
 
   test('TC-API-AUTH-08: Access protected route with expired JWT should return invalid token', async () => {
     const customContext = await request.newContext({
-      baseURL: backendBaseUrl,
+      baseURL: getBackendBaseUrl(),
       extraHTTPHeaders: {
         Authorization: `Bearer ${expiredJwtToken}`,
       },
@@ -186,11 +150,11 @@ test.describe('Auth API - Security', () => {
   });
 
   test('TC-API-AUTH-09: Valid token from user A should not expose user B accounts', async () => {
-    const authUserA = await ensureUserCanLogin(sender as TestUser);
-    const authUserB = await ensureUserCanLogin(receiver as TestUser);
+    const authUserA = await ensureUserCanLogin(apiContext, sender as TestUser);
+    const authUserB = await ensureUserCanLogin(apiContext, receiver as TestUser);
 
     const customContext = await request.newContext({
-      baseURL: backendBaseUrl,
+      baseURL: getBackendBaseUrl(),
       extraHTTPHeaders: {
         Authorization: `Bearer ${authUserA.token}`,
       },
@@ -213,9 +177,9 @@ test.describe('Auth API - Security', () => {
   });
 
   test('TC-API-AUTH-10: Access protected route with valid token should work', async () => {
-    const authData = await loginAndGetAuthData(validUser.email, validUser.password);
+    const authData = await loginUser(apiContext, validUser.email, validUser.password);
     const customContext = await request.newContext({
-      baseURL: backendBaseUrl,
+      baseURL: getBackendBaseUrl(),
       extraHTTPHeaders: {
         Authorization: `Bearer ${authData.token}`,
       },

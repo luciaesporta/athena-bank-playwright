@@ -1,6 +1,7 @@
 import { test, expect, request, APIRequestContext } from '@playwright/test';
 import { ENV, API_ENDPOINTS } from '../config/environment';
 import type { LoginSuccessBody, TestUser } from '../types';
+import { getBackendBaseUrl, ensureUserCanLogin } from '../utils/apiTestHelpers';
 
 const { validUser, sender, receiver } = ENV.testCredentials;
 
@@ -9,12 +10,6 @@ const API_DEBIT_ACCOUNT_TYPE = 'debit';
 const SENDER_SETUP_BALANCE = 5000;
 const VALID_TRANSFER_AMOUNT = 100;
 const NONEXISTENT_OBJECT_ID = '000000000000000000000000';
-
-const backendBaseUrl = (() => {
-  const configuredApiUrl = process.env.API_URL || ENV.apiUrl;
-  const cleanedUrl = configuredApiUrl.endsWith('/') ? configuredApiUrl.slice(0, -1) : configuredApiUrl;
-  return cleanedUrl.endsWith('/api') ? cleanedUrl.slice(0, -4) : cleanedUrl;
-})();
 
 type AccountRecord = {
   _id: string;
@@ -40,36 +35,6 @@ test.describe('Transfer API — Business Logic', () => {
   let senderAccountId: string;
 
   const accountsToDelete: { id: string; token: string }[] = [];
-
-  async function loginUser(email: string, password: string): Promise<LoginSuccessBody> {
-    const response = await apiContext.post(`/api${API_ENDPOINTS.AUTH.LOGIN}`, {
-      data: { email, password },
-    });
-    expect(response.status()).toBe(200);
-    return (await response.json()) as LoginSuccessBody;
-  }
-
-  async function ensureUserCanLogin(user: TestUser): Promise<LoginSuccessBody> {
-    const loginResponse = await apiContext.post(`/api${API_ENDPOINTS.AUTH.LOGIN}`, {
-      data: { email: user.email, password: user.password },
-    });
-
-    if (loginResponse.status() === 200) {
-      return (await loginResponse.json()) as LoginSuccessBody;
-    }
-
-    const signupResponse = await apiContext.post(`/api${API_ENDPOINTS.AUTH.SIGNUP}`, {
-      data: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        password: user.password,
-      },
-    });
-
-    expect([200, 201, 400, 409]).toContain(signupResponse.status());
-    return loginUser(user.email, user.password);
-  }
 
   async function getAccounts(token: string): Promise<AccountRecord[]> {
     const response = await apiContext.get(`/api${API_ENDPOINTS.ACCOUNTS.LIST}`, {
@@ -122,10 +87,10 @@ test.describe('Transfer API — Business Logic', () => {
   }
 
   test.beforeAll(async () => {
-    apiContext = await request.newContext({ baseURL: backendBaseUrl });
+    apiContext = await request.newContext({ baseURL: getBackendBaseUrl() });
 
-    const senderAuth = await ensureUserCanLogin(sender as TestUser);
-    const receiverAuth = await ensureUserCanLogin(receiver as TestUser);
+    const senderAuth = await ensureUserCanLogin(apiContext, sender as TestUser);
+    const receiverAuth = await ensureUserCanLogin(apiContext, receiver as TestUser);
     senderToken = senderAuth.token;
     receiverToken = receiverAuth.token;
 
