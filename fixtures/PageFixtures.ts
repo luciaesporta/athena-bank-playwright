@@ -4,6 +4,8 @@ import { PageDashboard } from '../pages/pageDashboard';
 import { PageSignUp } from '../pages/pageSignUp';
 import { ModalCreateBankAccount } from '../pages/modalCreateBankAccount';
 import { ModalTransferMoney } from '../pages/modalTransferMoney';
+import { ModalFreezeAccount } from '../pages/modalFreezeAccount';
+import { ModalFunding } from '../pages/modalFunding';
 import { ApiUtils } from '../utils/apiUtils';
 import { Logger } from '../utils/Logger';
 
@@ -13,6 +15,8 @@ export type PageFixtures = {
   pageSignUp: PageSignUp;
   modalCreateBankAccount: ModalCreateBankAccount;
   modalTransferMoney: ModalTransferMoney;
+  modalFreezeAccount: ModalFreezeAccount;
+  modalFunding: ModalFunding;
   apiUtils: ApiUtils;
 };
 
@@ -24,7 +28,7 @@ export const test = base.extend<PageFixtures>({
     await use(pageAuth);
     Logger.debug('PageAuth fixture cleanup');
   },
- 
+
   pageDashboard: async ({ page }, use) => {
     const pageDashboard = new PageDashboard(page);
     Logger.debug('PageDashboard fixture initialized', { page: page.url() });
@@ -46,12 +50,25 @@ export const test = base.extend<PageFixtures>({
     Logger.debug('ModalCreateBankAccount fixture cleanup');
   },
 
-
   modalTransferMoney: async ({ page }, use) => {
     const modalTransferMoney = new ModalTransferMoney(page);
     Logger.debug('ModalTransferMoney fixture initialized', { page: page.url() });
     await use(modalTransferMoney);
     Logger.debug('ModalTransferMoney fixture cleanup');
+  },
+
+  modalFreezeAccount: async ({ page }, use) => {
+    const modalFreezeAccount = new ModalFreezeAccount(page);
+    Logger.debug('ModalFreezeAccount fixture initialized', { page: page.url() });
+    await use(modalFreezeAccount);
+    Logger.debug('ModalFreezeAccount fixture cleanup');
+  },
+
+  modalFunding: async ({ page }, use) => {
+    const modalFunding = new ModalFunding(page);
+    Logger.debug('ModalFunding fixture initialized', { page: page.url() });
+    await use(modalFunding);
+    Logger.debug('ModalFunding fixture cleanup');
   },
 
   apiUtils: async ({ request }, use) => {

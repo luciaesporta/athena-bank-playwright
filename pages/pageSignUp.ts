@@ -1,4 +1,5 @@
-import {Page, Locator, APIRequestContext, expect} from '@playwright/test';
+import { Page, Locator, APIRequestContext, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
 interface HttpResponse {
     status(): number;
@@ -9,8 +10,7 @@ import { Routes, ApiRoutes } from '../support/routes';
 import { ConfigHelpers, API_ENDPOINTS } from '../config/environment';
 import { Logger } from '../utils/Logger';
 
-export class PageSignUp{
-    readonly page: Page;
+export class PageSignUp extends BasePage {
     readonly nameInput: Locator;
     readonly lastNameInput: Locator;
     readonly emailInput: Locator;
@@ -22,8 +22,8 @@ export class PageSignUp{
     readonly apiEndpoint: string;
 
     constructor(page: Page){
-        this.page = page;
-        this.nameInput = page.getByRole ('textbox', {name: 'Nombre'});
+        super(page);
+        this.nameInput = page.getByRole('textbox', { name: 'Nombre' });
         this.lastNameInput = page.locator('[name="lastName"]');
         this.emailInput = page.getByRole('textbox', { name: 'Correo electrónico' });
         this.passwordInput = page.getByRole('textbox', { name: 'Contraseña' });

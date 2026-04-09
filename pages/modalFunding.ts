@@ -1,7 +1,7 @@
-import {Page, Locator, expect} from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
-export class ModalFunding { 
-    readonly page: Page;
+export class ModalFunding extends BasePage {
     readonly addFundsDashboardButton: Locator;
     readonly accountCombobox: Locator;
     readonly accountComboboxOption: Locator;
@@ -11,7 +11,7 @@ export class ModalFunding {
     readonly cancelButton: Locator;
 
     constructor(page: Page) {
-        this.page = page;
+        super(page);
         this.addFundsDashboardButton = this.page.getByTestId('boton-agregar-fondos');
         this.accountCombobox = this.page.getByRole('combobox', { name: 'Cuenta *' });
         this.accountComboboxOption = this.page.getByRole('option', { name: '•••• ' });

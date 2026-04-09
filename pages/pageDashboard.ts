@@ -1,13 +1,13 @@
-import {Page, Locator, expect, APIRequestContext} from '@playwright/test';
+import { Page, Locator, expect, APIRequestContext } from '@playwright/test';
 import { Routes } from '../support/routes';
 import { ModalCreateBankAccount } from './modalCreateBankAccount';
 import { ApiUtils } from '../utils/apiUtils';
 import { ENV } from '../config/environment';
 import { Logger } from '../utils/Logger';
 import { TestHelpers } from '../utils/TestHelpers';
+import { BasePage } from './BasePage';
 
-export class PageDashboard {
-    readonly page: Page;
+export class PageDashboard extends BasePage {
     readonly buttonAddAccount: Locator;
     readonly dashboardTitle: Locator;
     readonly buttonLogOut: Locator;
@@ -17,7 +17,7 @@ export class PageDashboard {
     readonly elementsTransactionsAmounts: Locator;
 
     constructor(page: Page){
-        this.page = page;
+        super(page);
         this.buttonAddAccount = this.page.getByTestId('tarjeta-agregar-cuenta');
         this.dashboardTitle = this.page.getByTestId('titulo-dashboard');
         this.buttonLogOut = page.getByTestId('boton-logout');

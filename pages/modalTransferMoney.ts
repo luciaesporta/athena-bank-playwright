@@ -1,7 +1,7 @@
-import {Page, Locator, expect} from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
-export class ModalTransferMoney {
-    readonly page: Page;
+export class ModalTransferMoney extends BasePage {
     readonly recipientEmailInput: Locator;
     readonly fromAccountCombobox : Locator;
     readonly amountInput : Locator;
@@ -13,7 +13,7 @@ export class ModalTransferMoney {
 
 
     constructor(page: Page){
-        this.page = page; 
+        super(page);
         this.recipientEmailInput = this.page.getByRole('textbox', { name: 'Email del destinatario *' });
         this.fromAccountCombobox = this.page.getByRole('combobox', { name: 'Cuenta origen *' });
         this.amountInput = this.page.getByRole('spinbutton', { name: 'Monto a enviar *' });

@@ -1,7 +1,7 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
-export class ModalFreezeAccount {
-    readonly page: Page;
+export class ModalFreezeAccount extends BasePage {
     readonly freezeAccountButton: Locator;
     readonly unfreezeAccountButton: Locator;
     readonly freezeSuccessMessage: Locator;
@@ -11,7 +11,7 @@ export class ModalFreezeAccount {
 
 
 constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.freezeAccountButton = page.getByTestId('boton-congelar-cuenta').first();
     this.modalFreezeAccountFreezeButton = page.getByRole('button', { name: 'Congelar' })
     this.unfreezeAccountButton = page.getByRole('button', { name: 'Descongelar' }).first();

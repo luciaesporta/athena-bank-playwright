@@ -1,8 +1,8 @@
-import {Page, Locator, expect} from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { Logger } from '../utils/Logger';
+import { BasePage } from './BasePage';
 
-export class ModalCreateBankAccount {
-    readonly page: Page;
+export class ModalCreateBankAccount extends BasePage {
     readonly typeOfAccountCombobox: Locator;
     readonly optionCredit: Locator;
     readonly optionDebit: Locator;
@@ -16,7 +16,7 @@ export class ModalCreateBankAccount {
     readonly modalDeleteAccountSuccessMessage: Locator;
 
     constructor(page: Page){
-        this.page = page;
+        super(page);
         this.typeOfAccountCombobox = this.page.getByRole('combobox', { name: 'Tipo de cuenta *' });
         this.optionCredit = this.page.getByRole('option', { name: 'Crédito' });
         this.optionDebit = this.page.getByRole('option', { name: 'Débito' })

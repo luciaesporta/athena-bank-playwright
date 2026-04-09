@@ -1,10 +1,10 @@
-import {Page, Locator, expect} from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { Routes } from '../support/routes';
 import { Logger } from '../utils/Logger';
 import { TestHelpers } from '../utils/TestHelpers';
+import { BasePage } from './BasePage';
 
-export class PageAuth{
-    readonly page: Page;
+export class PageAuth extends BasePage {
     readonly emailInput: Locator;
     readonly passwordInput: Locator;
     readonly buttonLogIn: Locator;
@@ -18,7 +18,7 @@ export class PageAuth{
 
 
     constructor(page: Page){
-        this.page = page;
+        super(page);
         this.emailInput = page.getByRole('textbox', { name: 'Correo electrónico' });
         this.passwordInput = page.getByRole('textbox', { name: 'Contraseña' });
         this.buttonLogIn = page.getByTestId('boton-login');

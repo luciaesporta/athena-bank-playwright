@@ -1,7 +1,4 @@
 import { test, expect } from '../fixtures/PageFixtures';
-import { PageAuth } from '../pages/pageAuth';
-import { PageDashboard } from '../pages/pageDashboard';
-import { ModalCreateBankAccount } from '../pages/modalCreateBankAccount';
 import { PageSignUp } from '../pages/pageSignUp';
 import { Logger } from '../utils/Logger';
 
@@ -13,10 +10,10 @@ test.beforeEach(async ({ page, pageAuth }) => {
 
     const timestamp = Date.now();
     testUser = {
-        firstName: "Bank",
-        lastName: "Test",
+        firstName: 'Bank',
+        lastName: 'Test',
         email: `bankaccount${timestamp}@test.com`,
-        password: "12345678"
+        password: '12345678',
     };
 
     await page.goto('/signup');
@@ -26,24 +23,22 @@ test.beforeEach(async ({ page, pageAuth }) => {
     Logger.step('User created for bank account tests', { user: testUser.email });
 });
 
-test('TC1 - Create bank account successfully', async ({ pageAuth, pageDashboard, page }) => {
-    const modalCreateBankAccount = new ModalCreateBankAccount(page);
+test('TC1 - Create bank account successfully', async ({ pageAuth, pageDashboard, modalCreateBankAccount }) => {
     Logger.step('Test create bank account successfully', { testName: 'TC1 - Create bank account successfully' });
     await pageAuth.loginSuccessfully(testUser.email, testUser.password);
     await pageDashboard.visitDashboardPage();
     await pageDashboard.buttonAddAccount.click();
-    await modalCreateBankAccount.createAccount("Débito", "1000");
+    await modalCreateBankAccount.createAccount('Débito', '1000');
     await expect(modalCreateBankAccount.successMessage).toBeVisible();
     Logger.info('Bank account created successfully');
 });
 
-test('TC2 - Delete bank account successfully', async ({ pageAuth, pageDashboard, page }) => {
-    const modalCreateBankAccount = new ModalCreateBankAccount(page);
+test('TC2 - Delete bank account successfully', async ({ pageAuth, pageDashboard, modalCreateBankAccount }) => {
     Logger.step('Test delete bank account successfully', { testName: 'TC2 - Delete bank account successfully' });
     await pageAuth.loginSuccessfully(testUser.email, testUser.password);
     await pageDashboard.visitDashboardPage();
     await pageDashboard.buttonAddAccount.click();
-    await modalCreateBankAccount.createAccount("Débito", "1000");
+    await modalCreateBankAccount.createAccount('Débito', '1000');
     await expect(modalCreateBankAccount.successMessage).toBeVisible();
     await modalCreateBankAccount.deleteBankAccount();
     await expect(pageDashboard.buttonAddAccount).toBeVisible();
