@@ -266,23 +266,25 @@ export class TestHelpers {
 
 
   static async handleApiError(
-    error: any,
+    error: unknown,
     endpoint: string,
     method: string,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): Promise<never> {
     const errorMessage = `API ${method} ${endpoint} failed`;
+    const apiError = error as { status?: number; statusText?: string; message?: string };
     const errorDetails = {
       endpoint,
       method,
-      status: error.status,
-      statusText: error.statusText,
-      message: error.message,
+      status: apiError.status,
+      statusText: apiError.statusText,
+      message: apiError.message,
       ...context
     };
-    
-    Logger.error(errorMessage, error, errorDetails);
-    throw new Error(`${errorMessage}: ${error.message}`);
+
+    const err = error instanceof Error ? error : new Error(apiError.message ?? String(error));
+    Logger.error(errorMessage, err, errorDetails);
+    throw new Error(`${errorMessage}: ${apiError.message}`);
   }
 
 

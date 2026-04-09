@@ -6,8 +6,10 @@ import { ModalCreateBankAccount } from '../pages/modalCreateBankAccount';
 import { PageSignUp } from '../pages/pageSignUp';
 import { Logger } from '../utils/Logger';
 import { TEST_CONSTANTS, createTestUser, ROUTES } from '../constants/testConstants';
+import type { Page } from '@playwright/test';
+import type { TestUser } from '../types';
 
-async function setupUserWithBankAccount(page: any, pageAuth: any, pageDashboard: any, pageSignUp: any, user: any) {
+async function setupUserWithBankAccount(page: Page, pageAuth: PageAuth, pageDashboard: PageDashboard, pageSignUp: PageSignUp, user: TestUser) {
     Logger.step(`Setting up user: ${user.email}`);
 
     await page.goto(ROUTES.SIGNUP);
@@ -66,20 +68,15 @@ test('TC2 - Unfreeze account successfully', async ({ page }) => {
     
     Logger.step('Test unfreeze account successfully', { testName: 'TC2 - Unfreeze account successfully' });
     
-    // Setup user with bank account
     await setupUserWithBankAccount(page, pageObjects.pageAuth, pageObjects.pageDashboard, pageObjects.pageSignUp, user);
     
-    // Wait for page to load and account to be visible
     await page.waitForLoadState('networkidle');
     
-    // First freeze the account
     await pageObjects.modalFreezeAccount.freezeAccount();
     await expect(pageObjects.modalFreezeAccount.freezeSuccessMessage).toBeVisible();
     
-    // Wait for UI state to update properly
     await page.waitForLoadState('networkidle');
     
-    // Then test unfreeze
     await pageObjects.modalFreezeAccount.unfreezeAccount();
     await expect(pageObjects.modalFreezeAccount.unfreezeSuccessMessage).toBeVisible();
     

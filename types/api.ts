@@ -1,6 +1,4 @@
-/**
- * Base API response structure
- */
+
 export interface BaseApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -15,7 +13,7 @@ export interface UserData {
   firstName: string;
   lastName: string;
   email: string;
-  password?: string; // Usually not included in responses
+  password?: string; 
   createdAt?: string;
   updatedAt?: string;
 }
@@ -122,7 +120,7 @@ export interface ApiErrorResponse {
   error: string;
   message: string;
   status: number;
-  details?: any;
+  details?: unknown;
 }
 
 

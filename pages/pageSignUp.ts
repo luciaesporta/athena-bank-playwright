@@ -1,4 +1,10 @@
 import {Page, Locator, APIRequestContext, expect} from '@playwright/test';
+
+interface HttpResponse {
+    status(): number;
+    text(): Promise<string>;
+    json(): Promise<unknown>;
+}
 import { Routes, ApiRoutes } from '../support/routes';
 import { ConfigHelpers, API_ENDPOINTS } from '../config/environment';
 import { Logger } from '../utils/Logger';
@@ -76,7 +82,7 @@ export class PageSignUp{
         return { response, uniqueEmail };
     }
 
-    async validateSignupAPIResponse(response: any, userData: {firstName: string, lastName: string}, email: string) {
+    async validateSignupAPIResponse(response: HttpResponse, userData: {firstName: string, lastName: string}, email: string) {
         if (response.status() !== 201) {
             const errorBody = await response.text();
             Logger.error(`Unexpected signup status`, new Error(`Expected 201, got ${response.status()}`), { email, responseBody: errorBody });
@@ -84,13 +90,13 @@ export class PageSignUp{
         
         expect(response.status()).toBe(201);
         
-        const responseBody = await response.json();
-        
+        const responseBody = await response.json() as Record<string, unknown>;
+
         expect(responseBody).toHaveProperty('token');
-        expect(typeof responseBody.token).toBe('string');
+        expect(typeof responseBody['token']).toBe('string');
         expect(responseBody).toHaveProperty('user');
-        
-        expect(responseBody.user).toEqual(
+
+        expect(responseBody['user']).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 firstName: userData.firstName,

@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, APIRequestContext, APIResponse } from '@playwright/test';
 
 export interface BasePageInterface {
   readonly page: Page;
@@ -32,7 +32,7 @@ export interface DashboardPageInterface extends BasePageInterface {
   visitDashboardPage(): Promise<void>;
   logout(): Promise<void>;
   createBankAccount(accountType: string, balance: string): Promise<boolean>;
-  transferMoneyViaAPI(request: any, jwt: string, recipientEmail: string, amount: number): Promise<any>;
+  transferMoneyViaAPI(request: APIRequestContext, jwt: string, recipientEmail: string, amount: number): Promise<void>;
   refreshDashboardAndWait(): Promise<void>;
   verifyTransferOnDashboard(senderEmail: string, amount: number): Promise<void>;
   expectTransferVisible(senderEmail: string, amount: number): Promise<void>;
@@ -53,16 +53,15 @@ export interface SignupPageInterface extends BasePageInterface {
   completeSignUpForm(firstName: string, lastName: string, email: string, password: string): Promise<void>;
   clickSignUpButton(): Promise<void>;
   signUpUser(firstName: string, lastName: string, email: string, password: string): Promise<void>;
-  signUpUserViaAPI(request: any, firstName: string, lastName: string, email: string, password: string): Promise<any>;
-  validateSignupAPIResponse(response: any): void;
-  signUpUserViaUIWithAPIVerification(request: any, firstName: string, lastName: string, email: string, password: string): Promise<void>;
-  testSignupWith409Error(request: any, firstName: string, lastName: string, email: string, password: string): Promise<void>;
+  signUpUserViaAPI(request: APIRequestContext, userData: { firstName: string; lastName: string; email: string; password: string }): Promise<{ response: APIResponse; uniqueEmail: string }>;
+  validateSignupAPIResponse(response: { status(): number; text(): Promise<string>; json(): Promise<unknown> }, userData: { firstName: string; lastName: string }, email: string): Promise<void>;
+  signUpUserViaUIWithAPIVerification(userData: { firstName: string; lastName: string; email: string; password: string }): Promise<void>;
+  testSignupWith409Error(userData: { firstName: string; lastName: string; email: string; password: string }): Promise<void>;
   generateUniqueEmail(baseEmail: string): string;
 }
 
 
 export interface ModalInterface extends BasePageInterface {
-  // Common modal operations can be defined here
   close(): Promise<void>;
   isVisible(): Promise<boolean>;
 }
