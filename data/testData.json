@@ -1,8 +1,0 @@
-{
-  "validUser": {
-    "firstName": "Test",
-    "lastName": "User",
-    "email": "see .env → TEST_VALID_EMAIL",
-    "password": "see .env → TEST_VALID_PASSWORD"
-  }
-}

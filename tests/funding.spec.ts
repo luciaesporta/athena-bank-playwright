@@ -10,6 +10,13 @@ test.beforeEach(async ({ pageDashboard, pageAuth }) => {
     await pageDashboard.visitDashboardPage();
 });
 
+test.afterEach(async ({ pageAuth }, testInfo) => {
+    if (testInfo.status !== 'passed') {
+        Logger.warn(`Test "${testInfo.title}" ended with status: ${testInfo.status}`);
+    }
+    await pageAuth.logout();
+});
+
 test('TC1 - Add funds successfully', async ({ modalFunding }) => {
     Logger.step('Add funds successfully', { action: 'addFundsSuccessfully' });
     await modalFunding.addFunds('100');

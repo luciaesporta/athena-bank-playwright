@@ -1,68 +1,47 @@
-import { test, expect } from '@playwright/test';
-import { PageAuth } from '../pages/pageAuth';
+import { test as base, expect } from '../fixtures/PageFixtures';
 import { PageDashboard } from '../pages/pageDashboard';
-import { ModalCreateBankAccount } from '../pages/modalCreateBankAccount';
 import { ENV } from '../config/environment';
-import { ApiUtils } from '../utils/apiUtils';
 import { getUserEmailFromFile, getJwtFromStorage } from '../utils/authUtils';
-import { ModalTransferMoney } from '../pages/modalTransferMoney';
-import fs from 'fs/promises';
 
 const { receiver } = ENV.testCredentials;
 
-let pageAuth: PageAuth;
-let pageDashboard: PageDashboard;
-let modalCreateBankAccount: ModalCreateBankAccount;
-let modalTransferMoney: ModalTransferMoney;
-
-test.beforeEach(async ({page}) => {
-  pageAuth = new PageAuth(page);
-  pageDashboard = new PageDashboard(page);
-  modalCreateBankAccount = new ModalCreateBankAccount(page);
-  modalTransferMoney = new ModalTransferMoney(page);
-  await pageDashboard.visitDashboardPage();
-});
-
-const testSendsMoneyUser = test.extend({
+const testSendsMoneyUser = base.extend({
   storageState: 'playwright/.senderMoneyUser.json',
 });
 
-const testReceivesMoneyUser = test.extend({
+const testReceivesMoneyUser = base.extend({
   storageState: 'playwright/.receiverMoneyUser.json',
 });
 
-const testNewUserWithBankAccount = test.extend({
+const testNewUserWithBankAccount = base.extend({
   storageState: 'playwright/.newUserWithBankAccount.json',
 });
 
-testNewUserWithBankAccount('TC1 - Verify user can create a bank account correctly', async ({ page }) => {
-  const pageDashboard = new PageDashboard(page);
+base.beforeEach(async ({ pageDashboard }) => {
+  await pageDashboard.visitDashboardPage();
+});
+
+testNewUserWithBankAccount('TC1 - Verify user can create a bank account correctly', async ({ pageDashboard }) => {
   await expect(pageDashboard.dashboardTitle).toBeVisible({ timeout: 5000 });
   const accountCreated = await pageDashboard.createBankAccount('Débito', '1000');
   expect(accountCreated).toBe(true);
 });
 
-testSendsMoneyUser('TC2 - Verify user can send money to another user', async ({page}) => {
-  await expect (pageDashboard.dashboardTitle).toBeVisible({ timeout: 5000 });
-  await pageDashboard.buttonSendMoney.click(); 
+testSendsMoneyUser('TC2 - Verify user can send money to another user', async ({ pageDashboard, modalTransferMoney }) => {
+  await expect(pageDashboard.dashboardTitle).toBeVisible({ timeout: 5000 });
+  await pageDashboard.buttonSendMoney.click();
   await modalTransferMoney.completeAndSendMoneyTransfer(receiver.email, '25');
 });
 
-testReceivesMoneyUser('TC3 - Verify user receives money from another user', async ({page}) => {
-  await expect (pageDashboard.dashboardTitle).toBeVisible({ timeout: 5000 });
+testReceivesMoneyUser('TC3 - Verify user receives money from another user', async ({ pageDashboard }) => {
+  await expect(pageDashboard.dashboardTitle).toBeVisible({ timeout: 5000 });
   await expect(pageDashboard.receivedTransferEmailRow.first()).toBeVisible();
-  });
+});
 
-  testReceivesMoneyUser('TC4 - Verify money transfer via API', async ({ page, request }) => {
-    const emailSentUser = await getUserEmailFromFile('playwright/.senderMoneyUser.data.json');
-    const jwt = await getJwtFromStorage('playwright/.senderMoneyUser.json');
-    const randomAmount = PageDashboard.generateRandomAmount();
-    await pageDashboard.transferMoneyViaAPI(request, jwt, receiver.email, randomAmount);
-    await pageDashboard.verifyTransferOnDashboard(emailSentUser, randomAmount);
-  });
-  
-
-    
-
-
-
+testReceivesMoneyUser('TC4 - Verify money transfer via API', async ({ pageDashboard, request }) => {
+  const emailSentUser = await getUserEmailFromFile('playwright/.senderMoneyUser.data.json');
+  const jwt = await getJwtFromStorage('playwright/.senderMoneyUser.json');
+  const randomAmount = PageDashboard.generateRandomAmount();
+  await pageDashboard.transferMoneyViaAPI(request, jwt, receiver.email, randomAmount);
+  await pageDashboard.verifyTransferOnDashboard(emailSentUser, randomAmount);
+});

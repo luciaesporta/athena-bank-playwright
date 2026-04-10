@@ -46,7 +46,7 @@ test('TC5 - Login fails when email field is empty', async ({ pageAuth }) => {
 
 test('TC6 - Login fails with invalid email', async ({ pageAuth }) => {
   Logger.step('Test login failure with invalid email format', { testName: 'TC6 - Login fails with invalid email' });
-  await pageAuth.submitIncorrectEmailFormatLoginFormShouldFail('luciaalvarezesporta', validUser.password);
+  await pageAuth.submitIncorrectEmailFormatLoginFormShouldFail('invalid-email-format', validUser.password);
   Logger.info('Invalid email format test completed successfully');
 });
 
