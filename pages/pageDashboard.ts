@@ -23,8 +23,8 @@ export class PageDashboard extends BasePage {
         this.buttonLogOut = page.getByTestId('boton-logout');
         this.buttonSendMoney = this.page.getByTestId('boton-enviar');
         this.receivedTransferEmailRow = this.page.getByText('Transferencia de ', { exact: false });
-        this.elementsTransferList = this.page.locator('[data-testid="descripcion-transaccion"]'); 
-        this.elementsTransactionsAmounts = this.page.locator('[data-testid="monto-transaccion"]');
+        this.elementsTransferList = this.page.getByTestId('descripcion-transaccion');
+        this.elementsTransactionsAmounts = this.page.getByTestId('monto-transaccion');
     }
 
     async visitDashboardPage(){

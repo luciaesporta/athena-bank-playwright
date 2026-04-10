@@ -24,7 +24,7 @@ export class PageSignUp extends BasePage {
     constructor(page: Page){
         super(page);
         this.nameInput = page.getByRole('textbox', { name: 'Nombre' });
-        this.lastNameInput = page.locator('[name="lastName"]');
+        this.lastNameInput = page.getByRole('textbox', { name: 'Apellido' });
         this.emailInput = page.getByRole('textbox', { name: 'Correo electrónico' });
         this.passwordInput = page.getByRole('textbox', { name: 'Contraseña' });
         this.buttonSignUp = page.getByTestId('boton-registrarse'); 
