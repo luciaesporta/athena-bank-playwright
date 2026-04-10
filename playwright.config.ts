@@ -3,7 +3,10 @@ import { ENV, ConfigHelpers } from './config/environment';
 
 export default defineConfig({
   testDir: './tests',
-  reporter: 'html',
+  reporter: process.env.CI
+    ? [['list'], ['html', { open: 'never' }]]
+    : [['html', { open: 'on-failure' }]],
+  workers: process.env.CI ? 2 : undefined,
   timeout: 60000,
   use: {
     baseURL: ENV.baseUrl,

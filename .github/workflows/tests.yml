@@ -107,7 +107,7 @@ jobs:
           fi
 
           echo "Running tests with BASE_URL: $BASE_URL"
-          npx playwright test --reporter=html
+          npx playwright test
 
       - name: Save reports as artifacts
         if: always()
